@@ -1,0 +1,278 @@
+#include <iostream>
+#include "DoubleyLL.h"
+using namespace std;
+
+int main() {
+    DoubleyLL dLL;
+    string months[] = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    bool ip = false,fail = true;
+    for(int c = 0;c < 20;c++) {
+        int int_month = 0 + rand() % 11;
+        string month = months[int_month];
+        int_month += 1;
+        int day = 1 + rand() % 31;
+        int hour = 0 + rand() % 23;
+        int minute = 0 + rand() % 59;
+        int second = 0 + rand() % 59;
+        ip = !ip;
+        fail = !fail;
+        string ipAddress,failLogin;
+        if(ip) {
+            ipAddress = "43.0124.1245";
+        }
+        else {
+            ipAddress = "44.4562.8956";
+        }
+        if (fail) {
+            failLogin = " Illegal user";
+        }
+        else {
+            failLogin = " Wrong password";
+        }
+        int overallTime = int_month * 2678000 + day * 86400 + hour * 3600 + minute * 60 + second;
+        Atributes data(overallTime,day,hour,minute,second,month,ipAddress,failLogin);
+        dLL.push(data);
+    }
+    dLL.print();
+    cout << endl;
+    dLL.mergeSort(0,dLL.size - 1);
+    cout << endl;
+    dLL.print();
+    return 0;
+}
+
+#include <iostream>
+using namespace std;
+
+struct Atributes {
+    int overallTime;
+    int day,hour,minute,second;
+    string month,ipAddress,loginFail;
+    Atributes();
+    Atributes(int,int,int,int,int,string,string,string);
+    void print();
+};
+
+Atributes::Atributes() {
+    overallTime = 0;
+    day = 0;
+    hour = 0;
+    minute = 0;
+    second = 0;
+    month = " ";
+    ipAddress = " ";
+    loginFail = " ";
+}
+
+Atributes::Atributes(int overallTime,int day,int hour,int minute,int second,string month,string ipAddress,string loginFail) {
+    this->overallTime = overallTime;
+    this->day = day;
+    this->hour = hour;
+    this->minute = minute;
+    this->second = second;
+    this->month = month;
+    this->ipAddress = ipAddress;
+    this->loginFail = loginFail;
+}
+
+void Atributes::print() {
+    cout << month << " " << day << " " << hour << ":" << minute << ":" << second << " " << ipAddress << loginFail << " " << overallTime << 
+    endl;
+}
+
+#include "Stack.h"
+using namespace std;
+
+struct DoubleyLL {
+    Node* head;
+    Node* tail;
+    int size = 0;
+    DoubleyLL();
+    void push(Atributes);
+    void replace(int,Atributes);
+    void merge(int,int,int);
+    void mergeSort(int,int);
+    Atributes getData(int);
+    void print();
+};
+
+DoubleyLL::DoubleyLL() {
+    head = NULL;
+    tail = NULL;
+    size = 0;
+}
+
+void DoubleyLL::push(Atributes data) {
+    if(size != 0) {
+        tail->next = new Node(tail,data);
+        tail = tail->next;
+    }
+    else {
+        head = new Node(data);
+        tail = head;
+    }
+    size++;
+}
+
+Atributes DoubleyLL::getData(int position) {
+    Node* aux = head;
+    for(int c = 0;c < position;c++) {
+        aux = aux->next;
+    }
+    return aux->data;
+}
+
+void DoubleyLL::replace(int position,Atributes data) {
+    Node* aux = head;
+    for(int c = 0;c < position;c++) {
+        aux = aux->next;
+    }
+    aux->data = data;
+}
+
+void DoubleyLL::merge(int low,int mid,int high) {
+    int numberLeft = mid - low + 1;
+    int numberRight = high - mid;
+    Stack leftElements;
+    Stack rightElements;
+    for(int c = 0;c < numberLeft;c++) {
+        leftElements.push(getData(low + c));
+    }
+    for(int c = 0;c < numberRight;c++) {
+        rightElements.push(getData(mid + 1 + c));
+    }
+    cout << "Low: " << low << " Mid: " << mid << " High: " << high << endl;
+    cout << "Left Elements: " << endl;
+    leftElements.print();
+    cout << "Right Elements: " << endl;
+    rightElements.print();
+    cout << endl;
+    int left = 0;
+    int right = 0;
+    int general = low;
+    while(left < numberLeft && right < numberRight) {
+        if(leftElements[left].overallTime <= rightElements[right].overallTime) {
+            replace(general,leftElements[left]);
+            left++;
+
+        }
+        else {
+            replace(general,rightElements[right]);
+            right++;
+        }
+        general++;
+    }
+    while(left < numberLeft) {
+        replace(general,leftElements[left]);
+        general++;
+        left++;
+    }
+    while(right < numberRight) {
+        replace(general,rightElements[right]);
+        general++;
+        right++;
+    }
+    cout << "Modified DoubleyLL: \n";
+    print();
+    cout << endl;
+}
+
+void DoubleyLL::mergeSort(int low,int high) {
+    if(low < high) {
+        int mid = low + (high - low) / 2;
+        mergeSort(low,mid);
+        mergeSort(mid + 1,high);
+        merge(low,mid,high);
+    }
+}
+
+void DoubleyLL::print() {
+    Node* aux = head;
+    while(aux != NULL) {
+        aux->data.print();
+        aux = aux->next;
+    }
+}
+
+#include "Atributes.h"
+using namespace std;
+
+struct Node {
+    Node* next;
+    Node* previous;
+    Atributes data;
+    Node();
+    Node(Atributes);
+    Node(Node*,Atributes);
+    Node(Atributes,Node*);
+    Node(Node*,Atributes,Node*);
+};
+
+Node::Node() {
+    next = NULL;
+    previous = NULL;
+}
+
+Node::Node(Atributes data) {
+    previous = NULL;
+    this->data = data;
+    next = NULL;
+}
+
+Node::Node(Node* previous,Atributes data) {
+    this->previous = previous;
+    this->data = data;
+    next = NULL;
+}
+
+Node::Node(Atributes data,Node* next) {
+    previous = NULL;
+    this->data = data;
+    this->next = next;
+}
+
+Node::Node(Node* previous,Atributes data,Node* next) {
+    this->previous = previous;
+    this->data = data;
+    this->next = next;
+}
+
+#include "Node.h"
+using namespace std;
+
+struct Stack {
+    Node* head;
+    int size;
+    Stack();
+    void push(Atributes);
+    Atributes operator[](int);
+    void print();
+};
+
+Stack::Stack() {
+    head = NULL;
+    size = 0;
+}
+
+void Stack::push(Atributes data) {
+    head = new Node(data,head);
+    size++;
+}
+
+Atributes Stack::operator[](int position) {
+    Node* aux = head;
+    for(int c = 0;c < position;c++) {
+        aux = aux->next;
+    }
+    return aux->data;
+}
+
+void Stack::print() {
+    Node* aux = head;
+    int counter = 0;
+    while(aux != NULL) {
+        cout << counter++ << ".- ";
+        aux->data.print();
+        aux = aux->next;
+    }
+}
