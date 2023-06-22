@@ -1,2 +1,2 @@
 # data_structures_2
-Data structures implemented for class activities.
+Implementation of data structures used for school courses.
